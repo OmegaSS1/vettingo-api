@@ -11,6 +11,7 @@ class UserSubscription extends UserAction {
         $sub = $this->iUserSubscriptionRepository->findByUserId($this->USER->sub);
         if(!$sub)
             $sub = $this->iSubscriptionPlanRepository->findBySlug('FREE');
+        
         $this->toArray($sub);
 
         return $this->respondWithData($sub);

@@ -13,10 +13,9 @@ class UpdateVetWorkLocationSchedule extends VeterinarianAction {
         $form = $this->post();
         $id = $this->validate($form);
 
-        $this->iVetWorkLocationScheduleRepository->update($form,"id = $id");
-        $schedule = $this->iVetWorkLocationScheduleRepository->findById($id);
-        $this->toArray($schedule);
+        $schedule = $this->iVetWorkLocationScheduleRepository->update($form,"id = $id");
 
+        $this->toArray($schedule);
         return $this->respondWithData($schedule);
     }
 

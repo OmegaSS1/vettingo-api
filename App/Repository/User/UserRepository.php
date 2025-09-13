@@ -58,16 +58,18 @@ class UserRepository implements IUserRepository {
 		return $this->getObject($registers);
 	}
 
-	public function insert(array $data): int{
-		return $this->database->insert($this->table, $data);
+	public function insert(array $data){
+		$data = $this->database->insert($this->table, $data);
+		return $this->getObject($data);
 	}
 
 	public function delete(array $data): void{
 		$this->database->delete($this->table, $data);
 	}
 
-	public function update(array $data, string $where, string $and = ""): void{
-		$this->database->update($this->table, $data, $where, $and);
+	public function update(array $data, string $where, string $and = ""){
+		$data = $data = $this->database->update($this->table, $data, $where,$and);
+		return $this->getObject($data);
 	}
 
 	public function multipleTransaction(array $matriz): void {

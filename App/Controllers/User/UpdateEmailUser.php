@@ -12,13 +12,12 @@ class UpdateEmailUser extends UserAction {
         $form = $this->post();
         $id = $this->validate($form);
 
-        $this->iUserEmailRepository->update([
+        $user = $this->iUserEmailRepository->update([
             '"isPublic"' => $form["isPublic"],
             '"isActive"' => $form["isActive"],
             '"isPrimary"' => $form["isPrimary"],
         ], "id = $id");
 
-        $user = $this->iUserEmailRepository->findByUserId($this->USER->sub);
         $this->toArray($user);
         
         return $this->respondWithData($user);
@@ -29,12 +28,9 @@ class UpdateEmailUser extends UserAction {
         ["isActive", "isPublic", "isPrimary"],
     ["Ativo", "Público", "Principal"]);
         
-        $id = $this->args["id"];
+        $id = filter_var($this->getArg("id"), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
         
-        if(!$id = filter_var($id, FILTER_VALIDATE_INT)){
-            throw new Exception("ID do email inválido", 400);
-        }
-        else if(!$email = $this->iUserEmailRepository->findById($id)){
+        if(!$id || !$email = $this->iUserEmailRepository->findById($id)){
             throw new Exception("Email não encontrado", 404);
         } 
         else if($email->getUserId() != $this->USER->sub){

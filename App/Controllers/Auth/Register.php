@@ -19,7 +19,7 @@ class Register extends AuthAction {
         $fisrtName = trim($form["userFirstName"]);
         $lastName = trim($form["userLastName"]);
 
-        $user_id = $this->iUserRepository->insert([
+        $user = $this->iUserRepository->insert([
             "role" => trim($form['role']),
             "cpf" => $form['userCpf'],
             "first_name" => $fisrtName,
@@ -31,45 +31,32 @@ class Register extends AuthAction {
 
         $this->iUserEmailRepository->insert([
             "email" => $form["email"],
-            "user_id" => $user_id
+            "user_id" => $user->getId()
         ]);
 
         $this->iUserPhoneRepository->insert([
             "number" => $form["phoneNumber"],
             '"areaCode"' => $form["phoneDDD"],
             '"countryCode"' => $form["phoneDDI"],
-            "user_id" => $user_id
+            "user_id" => $user->getId()
         ]);
 
         $password_hash = password_hash(trim($form["userPassword"]), PASSWORD_DEFAULT);
         $this->iUserSecurityProfileRepository->insert([
             "password" => $password_hash,
-            "user_id" => $user_id
+            "user_id" => $user->getId()
         ]);
 
         $fullName = "$fisrtName $lastName";
         $phone = "+{$form["phoneDDI"]}{$form["phoneDDD"]}{$form["phoneNumber"]}";
-        $customer = $this->stripe->createCustomer($form['email'], $fullName, $phone, ["user_id" => $user_id, "cpf" => $form["userCpf"]]);
+        
+        $customer = $this->stripe->createCustomer($form['email'], $fullName, $phone, ["user_id" => $user->getId(), "cpf" => $form["userCpf"]]);
         $stripe_customer_id = $customer->id;
-        $this->iUserRepository->update(["stripe_customer_id" => $stripe_customer_id], "id = $user_id");
+        $user = $this->iUserRepository->update(["stripe_customer_id" => $stripe_customer_id], "id = {$user->getId()}");
 
         $this->iDatabaseRepository->commit();
 
-        $user = [
-            "id" => $user_id,
-            "firstName" => $fisrtName,
-            "lastName" =>  $lastName,
-            "isActive" => true,
-            "role" => $form["role"],
-            "cpf" => $form["userCpf"],
-            "birthDate" => $form["userBirthDate"],
-            "gender" => $form["userGender"],
-            "wantsNewsletter" => $form["userWantsNewsletter"] ?? false,
-            "createdAt" => date('Y-m-d H:i:s'),
-            "updatedAt" => date('Y-m-d H:i:s'),
-            "stripeCustomerId" => $stripe_customer_id,
-        ];
-
+        $this->toArray($user);
         return $this->respondWithData([$user, "Usuário criado com sucesso!"]);
     }
 

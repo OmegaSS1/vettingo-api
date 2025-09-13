@@ -27,11 +27,11 @@ class UpdateUser extends UserAction {
         }
 
         try {
-            $this->iUserRepository->update([
+            $user = $this->iUserRepository->update([
                 "first_name" => $form["firstName"],
                 "last_name" => $form["lastName"],
                 "avatar" => $form["avatar"]
-            ], "id = " . (int) $this->USER->sub);
+            ], "id = " . (int) $this->USER->sub, "");
 
             if($oldAvatar) {
                 $this->vettingoBucket->delete($oldAvatar);
@@ -46,8 +46,6 @@ class UpdateUser extends UserAction {
         $this->iDatabaseRepository->commit();
 
         $this->toArray($user);
-        $user["avatar"] = $form["avatar"];
-
         return $this->respondWithData($user);
     }
 

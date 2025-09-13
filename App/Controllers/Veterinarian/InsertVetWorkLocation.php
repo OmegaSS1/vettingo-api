@@ -13,7 +13,7 @@ class InsertVetWorkLocation extends VeterinarianAction {
         $form = $this->post();
         $id = $this->validate($form);
 
-        $id = $this->iVetWorkLocationRepository->insert([
+        $vetWork = $this->iVetWorkLocationRepository->insert([
             "veterinarian_id" => $id,
             "name" => $form["name"],
             "state_id" => $form["stateId"],
@@ -28,10 +28,9 @@ class InsertVetWorkLocation extends VeterinarianAction {
             "longitude" => $form["longitude"] ?? NULL
         ]);
 
-        $vet = $this->iVetWorkLocationRepository->findById($id);
-        $this->toArray($vet);
+        $this->toArray($vetWork);
          
-        return $this->respondWithData($vet);
+        return $this->respondWithData($vetWork);
     }
 
     private function validate(&$form) {
@@ -63,11 +62,15 @@ class InsertVetWorkLocation extends VeterinarianAction {
         else if(!preg_match("/^\d{5}-?\d{3}$/", $form["zipCode"])){
             throw MessageException::CEP_INVALIDO();
         }
+        else if(!preg_match("/^(-?[0-8]?\d(\.\d+)?|90(\.0+)?)$/", $form["latitude"])){
+            throw MessageException::LATITUDE_INVALID();
+        }
+        else if(!preg_match("/^(-?(1[0-7]\d|[0-9]?\d)(\.\d+)?|180(\.0+)?)$/", $form["longitude"])){
+            throw MessageException::LONGITUDE_INVALID();
+        }
 
         $form["stateId"] = $stateId;
         $form["cityId"] = $cityId;
-        $form["latitude"] = filter_var($form["latitude"], FILTER_VALIDATE_FLOAT, FILTER_NULL_ON_FAILURE);
-        $form["longitude"] = filter_var($form["longitude"], FILTER_VALIDATE_FLOAT, FILTER_NULL_ON_FAILURE);
         $form["zipCode"] = preg_replace("/\D/", "", $form["zipCode"]);
         return $vet->getId();
     }

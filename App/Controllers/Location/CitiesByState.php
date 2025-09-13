@@ -49,9 +49,7 @@ class CitiesByState extends LocationAction {
     }
 
     private function validade() {
-        $id = $this->getArg("id");
-
-        $id = filter_var($id, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+        $id = filter_var($this->getArg("id"), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
         if(is_null($id)){
             throw new Exception("Estado não encontrado", 404);
         }

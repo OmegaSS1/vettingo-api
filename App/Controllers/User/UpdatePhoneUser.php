@@ -12,14 +12,13 @@ class UpdatePhoneUser extends UserAction {
         $form = $this->post();
         $id = $this->validate($form);
 
-        $this->iUserPhoneRepository->update([
+        $user = $this->iUserPhoneRepository->update([
             '"isPublic"' => $form["isPublic"],
             '"isActive"' => $form["isActive"],
             '"isPrimary"' => $form["isPrimary"],
             '"isWhatsapp"' => $form["isWhatsapp"] ?? "FALSE"
         ], "id = $id");
 
-        $user = $this->iUserPhoneRepository->findByUserId($this->USER->sub);
         $this->toArray($user);
         
         return $this->respondWithData($user);
@@ -30,12 +29,9 @@ class UpdatePhoneUser extends UserAction {
         ["isActive", "isPublic", "isPrimary"],
     ["Ativo", "Público", "Principal"]);
 
-        $id = $this->args["id"];
+        $id = filter_var($this->getArg("id"), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
         
-        if(!$id = filter_var($id, FILTER_VALIDATE_INT)){
-            throw new Exception("ID do telefone inválido", 400);
-        }
-        else if(!$phone = $this->iUserPhoneRepository->findById($id)){
+        if(!$id || !$phone = $this->iUserPhoneRepository->findById($id)){
             throw new Exception("Telefone não encontrado", 404);
         } 
         else if($phone->getUserId() != $this->USER->sub){

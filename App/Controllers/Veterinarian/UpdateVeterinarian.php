@@ -13,7 +13,7 @@ class UpdateVeterinarian extends VeterinarianAction {
         $form = $this->post();
         $id = $this->validate($form);
 
-        $this->iVeterinarianRepository->update([
+        $vet = $this->iVeterinarianRepository->update([
             "bio" => $form["bio"],
             "website" => $form["website"],
             "crmv" => $form["crmv"],
@@ -24,9 +24,10 @@ class UpdateVeterinarian extends VeterinarianAction {
             "profile_photos" => $form["profilePhotos"],
             "emergencial_attendance" => $form["providesEmergencyService"] === true ? 'TRUE' : 'FALSE',
             "domiciliary_attendance" => $form["providesHomeService"] === true ? 'TRUE' : 'FALSE',
-        ], "id = $id");
+        ], "id = $id", "");
 
-        return $this->respondWithData($form);
+        $this->toArray($vet);
+        return $this->respondWithData($vet);
     }
 
     private function validate(array $form){

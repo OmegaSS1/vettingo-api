@@ -143,12 +143,19 @@ class Database{
         $paramLimit = $limit > 0 ? "LIMIT ? " : "";
         $paramOffset = $offset > 0 ? "OFFSET ? " : "";
 
-        [$paramWhere, $param1] = $this->toBind($paramWhere, "WHERE");
-        [$paramAnd, $param2] = $this->toBind($paramAnd, "AND");
-
         $bindParams = [];
-        if(!is_null($param1) or !empty($param1)) $bindParams = array_merge($bindParams, $param1);
-        if(!is_null($param2) or !empty($param2)) $bindParams = array_merge($bindParams, $param2);
+        $data1 = $this->toBind($paramWhere, "WHERE");
+        $data2 = $this->toBind($paramAnd, "AND");
+
+        if(isset($data1[0]) and isset($data1[1])){
+            $paramWhere = $data1[0];
+            if($data1[1] !== null or !empty($data1[1])) $bindParams = array_merge($bindParams, $data1[1]);
+        }
+        if(isset($data2[0]) and isset($data2[1])){
+            $paramAnd = $data2[0];
+            if($data2[1] !== null or !empty($data2[1])) $bindParams = array_merge($bindParams, $data2[1]);
+        }
+        
         if(!empty($paramLimit)) $bindParams[] = $limit;
         if(!empty($paramOffset)) $bindParams[] = $offset;
 
@@ -167,17 +174,18 @@ class Database{
         }
     }
     
-    public function update($table, $values, $where, $and = ''): void{
+    public function update($table, $values, $where, $and = ''){
         $and    = strlen($and) ? ' AND '.$and : '';
         $fields = array_keys($values);
 
-        $query  = "UPDATE $table SET ".implode(" = ?, ", $fields)." = ? WHERE $where $and";
-        
+        $query  = "UPDATE $table SET ".implode(" = ?, ", $fields)." = ? WHERE $where $and RETURNING *";
+
         try {
             $this->validTable($table);
 
             #Verifica se esta logado
-            $this->bindValue($query, $values);
+            $stm = $this->bindValue($query, $values);
+            return $stm->fetchAll(PDO::FETCH_ASSOC);
 
         }catch(Exception $e){
             $this->connection->rollback();
@@ -187,26 +195,18 @@ class Database{
         }
     }
     
-    public function insert($table, $values, $withReturning = false){
+    public function insert($table, $values){
 
         $fields = array_keys($values);
         $binds  = array_pad([], count($fields), '?');
-        $query  = "INSERT INTO $table (".implode(',', $fields).") VALUES(".implode(',', $binds).")";
-
-        if($withReturning){
-            $query .= " RETURNING *";
-        }
+        $query  = "INSERT INTO $table (".implode(',', $fields).") VALUES(".implode(',', $binds).") RETURNING *";
 
         try {
             $this->validTable($table);
 
             #Verifica se esta logado
             $stm = $this->bindValue($query, $values);
-
-            if($withReturning){
-                return $stm->fetch(PDO::FETCH_ASSOC);
-            }
-            return $this->connection->lastInsertId();
+            return $stm->fetchAll(PDO::FETCH_ASSOC);
         }catch(PDOException $e){
             $this->connection->rollback();
             $this->connection = null;

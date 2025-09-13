@@ -41,7 +41,7 @@ abstract class Action
         $this->args     = $args;
         $this->USER     = $this->request->getAttribute("USER") ?? (object) ["sub" => "Usuário não logado"];
         $this->logInfo  = [
-            "User"     => $this->USER->data->id, 
+            "User"     => $this->USER->data->id ?? "Usuário não logado", 
             "Ip"       => IP, 
             "Method"   => $this->request->getMethod(), 
             "Route"    => $this->request->getUri()->getPath(),

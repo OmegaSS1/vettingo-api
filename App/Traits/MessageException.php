@@ -32,6 +32,22 @@ trait MessageException
         };
     }
 
+    public static function LATITUDE_INVALID(): Exception
+    {
+        return new class extends Exception {
+            protected $message = "Por favor, insira uma latitude válida.";
+            protected $code = 400;
+        };
+    }
+
+    public static function LONGITUDE_INVALID(): Exception
+    {
+        return new class extends Exception {
+            protected $message = "Por favor, insira uma longitude válida.";
+            protected $code = 400;
+        };
+    }
+
     public static function PHONE(): Exception
     {
         return new class extends Exception {

@@ -12,7 +12,6 @@ class InsertUserPaymentMethod extends SubscriptionAction {
         $user = $this->validate();
         $paymentMethod = $this->stripe->createPaymentMethod($user->getStripeCustomerId());
 
-        
         return $this->respondWithData(["clientSecret" => $paymentMethod->client_secret]);
     }
 

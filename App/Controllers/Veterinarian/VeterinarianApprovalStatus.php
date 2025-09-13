@@ -18,9 +18,9 @@ class VeterinarianApprovalStatus extends VeterinarianAction {
     }
 
     private function validate(){
-        $id = $this->args["id"];
+        $id = filter_var($this->getArg('id'), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
 
-        if(!$id = filter_var($id, FILTER_VALIDATE_INT)){
+        if(!$id){
             throw new Exception('ID do veterinário é obrigatório e deve ser positivo', 400);
         }
 

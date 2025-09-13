@@ -13,17 +13,16 @@ class InsertEmailUser extends UserAction {
         $form = $this->post();
         $this->validate($form);
 
-        $id = $this->iUserEmailRepository->insert([
+        $user = $this->iUserEmailRepository->insert([
             "email" => $form["email"],
             "user_id" => $this->USER->sub,
             '"isPublic"' => $form["isPublic"],
             '"isActive"' => $form["isActive"],
             '"isPrimary"' => $form["isPrimary"],
         ]);
-
-        $user = $this->iUserEmailRepository->findByUserId($id);
-
-        return $this->respondWithData([]);
+        
+        $this->toArray($user);
+        return $this->respondWithData($user);
     }
 
     private function validate(&$form){

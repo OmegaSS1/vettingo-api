@@ -15,7 +15,7 @@ class InsertVeterinarian extends VeterinarianAction {
 
         $this->iDatabaseRepository->disableCommit();
 
-        $id = $this->iVeterinarianRepository->insert([
+        $vet = $this->iVeterinarianRepository->insert([
             "user_id" => $this->USER->sub,
             "bio" => $form["bio"],
             "website" => $form["website"],
@@ -33,14 +33,16 @@ class InsertVeterinarian extends VeterinarianAction {
         ]);
 
         $this->iVeterinarianApprovalPendingRepository->insert([
-            "veterinarian_id" => $id,
+            "veterinarian_id" => $vet['id'],
             "status" => "WAITING_DATA",
             "created_at" => date("Y-m-d H:i:s"),
             "updated_at"=> date("Y-m-d H:i:s"),
         ]);
 
         $this->iDatabaseRepository->commit();
-        return $this->respondWithData($form);
+
+        $this->toArray($vet);
+        return $this->respondWithData($vet);
     }
 
     private function validate(array $form){

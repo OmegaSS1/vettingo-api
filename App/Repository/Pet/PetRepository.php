@@ -60,16 +60,18 @@ class PetRepository implements IPetRepository {
 		return $this->getObject($registers);
 	}
 
-	public function insert(array $data, bool $withReturning = false){
-		return $this->database->insert($this->table, $data, $withReturning);
+	public function insert(array $data){
+		$data = $this->database->insert($this->table, $data);
+		return $this->getObject($data);
 	}
 
 	public function delete(array $data): void{
 		$this->database->delete($this->table, $data);
 	}
 
-	public function update(array $data, string $where, string $and = ""): void{
-		$this->database->update($this->table, $data, $where, $and);
+	public function update(array $data, string $where, string $and = ""){
+		$data = $data = $this->database->update($this->table, $data, $where,$and);
+		return $this->getObject($data);
 	}
 
 	public function multipleTransaction(array $matriz): void {
@@ -130,10 +132,9 @@ interface IPetRepository {
 	/**
 	 * Summary of insert
 	 * @param array $user
-	 * @param bool $withReturning
 	 * @return mixed
 	 */
-	public function insert(array $user, bool $withReturning = false);
+	public function insert(array $user);
 
 	/**
 	 * Summary of update

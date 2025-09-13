@@ -20,14 +20,12 @@ class DeletePhoneUser extends UserAction {
     }
 
     private function validate(&$form){
-        $id = $this->args["id"];
         $totalPhones = $this->iUserPhoneRepository->findByUserId($this->USER->sub);
         $totalPhones = is_array($totalPhones) ? $totalPhones : [$totalPhones];
 
-        if(!$id = filter_var($id, FILTER_VALIDATE_INT)){
-            throw new Exception("ID do telefone inválido", 400);
-        }
-        else if(!$phone = $this->iUserPhoneRepository->findById($id)){
+        $id = filter_var($this->getArg('id'), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+
+        if(!$id || !$phone = $this->iUserPhoneRepository->findById($id)){
             throw new Exception("Telfone não encontrado", 404);
         } 
         else if($phone->getUserId() != $this->USER->sub){

@@ -40,7 +40,7 @@ class InsertUserPet extends PetAction {
                 "avatar"=> $form["avatar"] ?? "",
                 "description" => $form["description"] ?? "",
                 '"isActive"' => 'TRUE'
-            ], true);
+            ]);
         } catch (Exception $e) {
             if(!empty($form["avatar"]))
                 $this->vettingoBucket->delete($form["avatar"]);
@@ -50,6 +50,8 @@ class InsertUserPet extends PetAction {
         }
 
         $this->iDatabaseRepository->commit();
+
+        $this->toArray($pet);
         return $this->respondWithData($pet);
     }
 

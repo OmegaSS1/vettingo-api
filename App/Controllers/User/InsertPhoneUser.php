@@ -13,7 +13,8 @@ class InsertPhoneUser extends UserAction {
         $form = $this->post();
         $this->validate($form);
 
-        $id = $this->iUserPhoneRepository->insert([
+        $this->iDatabaseRepository->disableCommit();
+        $user = $this->iUserPhoneRepository->insert([
             "number" => $form["number"],
             '"areaCode"'=> $form["areaCode"],
             '"countryCode"'=> $form["countryCode"],
@@ -24,9 +25,8 @@ class InsertPhoneUser extends UserAction {
             '"isWhatsapp"' => $form["isWhatsapp"]
         ]);
 
-        $user = $this->iUserEmailRepository->findByUserId($id);
-
-        return $this->respondWithData([]);
+        $this->toArray($user);
+        return $this->respondWithData($user);
     }
 
     private function validate(&$form){

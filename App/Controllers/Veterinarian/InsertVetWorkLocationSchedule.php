@@ -17,17 +17,14 @@ class InsertVetWorkLocationSchedule extends VeterinarianAction {
             if($existingSchedule->getIsActive()){
                 throw new Exception("Ja existe um agendamento para este dia", 400);
             }
-            $this->iVetWorkLocationScheduleRepository->update([
+            $schedule = $this->iVetWorkLocationScheduleRepository->update([
                 '"isActive"' => 'TRUE',
                 "deleted_at" => NULL,
                 "updated_at" => date("Y-m-d H:i:s")
             ], "id = {$existingSchedule->getId()}");
-
-            $form["id"] = $existingSchedule->getId();
-            $form["vetWorkLocationId"] = $existingSchedule->getVetWorkLocationId();
         }
         else {        
-            $lastId = $this->iVetWorkLocationScheduleRepository->insert([
+            $schedule = $this->iVetWorkLocationScheduleRepository->insert([
                 "vet_work_location_id" => $id,
                 "day_of_week" => $form["dayOfWeek"],
                 "start_time" => $form["startTime"],
@@ -36,17 +33,10 @@ class InsertVetWorkLocationSchedule extends VeterinarianAction {
                 "created_at" => date('Y-m-d H:i:s'),
                 "updated_at" => date('Y-m-d H:i:s')
             ]);
-
-            $form["id"] = $lastId;
-            $form["vetWorkLocationId"] = $id;
-
         }
 
-        $form["isActive"] = true;
-        $form["createdAt"] = date("Y-m-d H:i:s");
-        $form["updatedAt"] = date("Y-m-d H:i:s");
-
-        return $this->respondWithData($form);
+        $this->toArray($schedule);
+        return $this->respondWithData($schedule);
     }
 
     private function validate(&$form){

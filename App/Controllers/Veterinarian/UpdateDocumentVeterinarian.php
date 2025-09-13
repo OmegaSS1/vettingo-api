@@ -28,7 +28,7 @@ class UpdateDocumentVeterinarian extends VeterinarianAction {
         }
 
         try {
-            $this->iVeterinarianApprovalPendingRepository->update([
+            $status = $this->iVeterinarianApprovalPendingRepository->update([
                 "rg_front_image_url" => $form["rgFrontImageFilename"],
                 "rg_back_image_url" => $form["rgBackImageFilename"],
                 "crmv_document_image_url" => $form["crmvDocumentImageFilename"],
@@ -44,25 +44,18 @@ class UpdateDocumentVeterinarian extends VeterinarianAction {
 
         $this->iDatabaseRepository->commit();
 
-        $vet = $this->iVeterinarianApprovalPendingRepository->findById($id);
-        $this->toArray($vet);
-
-        //$this->iDatabaseRepository->commit();
-        return $this->respondWithData($vet);
+        $this->toArray($status);
+        return $this->respondWithData($status);
     }
 
     private function validate(array &$form){
-        $id = $this->args["id"];
-
         $this->validKeysForm($form,
     ["rgFrontImage","rgBackImage","crmvDocumentImage"],
 ["RG - Frente", "RG - Verso", "Documento CRMV"]);
 
-        $id = filter_var($id, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
-        if(is_null($id)){
-            throw new Exception("ID do veterinário é obrigatório e deve ser positivo", 400);
-        }
-        else if(!$vet = $this->iVeterinarianApprovalPendingRepository->findByVeterinarianId($id)){
+        $id = filter_var($this->getArg('id'), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+
+        if(!$id || !$vet = $this->iVeterinarianApprovalPendingRepository->findByVeterinarianId($id)){
             throw new Exception("Registro de aprovação não encontrado para este veterinário", 404);
         }
 
