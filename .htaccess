@@ -1,0 +1,16 @@
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [QSA,L]
+
+Options -Indexes
+# Bloquea acesso aos arquivos .conf e .json
+<FilesMatch "\.conf$">
+    Deny from all
+</FilesMatch>
+
+<FilesMatch "\.json$">
+    Deny from all
+</FilesMatch>
+
+AddDefaultCharset utf-8
