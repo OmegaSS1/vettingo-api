@@ -9,6 +9,9 @@ use App\Repository\Payment\IPaymentRepository;
 use App\Repository\PaymentMethod\IPaymentMethodRepository;
 use App\Repository\SubscriptionPlan\ISubscriptionPlanRepository;
 use App\Repository\User\IUserRepository;
+use App\Repository\UserEmail\IUserEmailRepository;
+use App\Repository\UserPhone\IUserPhoneRepository;
+use App\Repository\UserSubscription\IUserSubscriptionRepository;
 use App\Services\Stripe;
 use Psr\Log\LoggerInterface;
 
@@ -21,6 +24,9 @@ abstract class SubscriptionAction extends Action
     protected IPaymentRepository $iPaymentRepository;
     protected IPaymentMethodRepository $iPaymentMethodRepository;
     protected Stripe $stripe;
+    protected IUserEmailRepository $iUserEmailRepository;
+    protected IUserPhoneRepository $iUserPhoneRepository;
+    protected IUserSubscriptionRepository $iUserSubscriptionRepository;
 
     public function __construct (
         LoggerInterface $logger,
@@ -29,7 +35,10 @@ abstract class SubscriptionAction extends Action
         ISubscriptionPlanRepository $iSubscriptionPlanRepository,
         IPaymentRepository $iPaymentRepository,
         IPaymentMethodRepository $iPaymentMethodRepository,
-        Stripe $stripe
+        Stripe $stripe,
+        IUserEmailRepository $iUserEmailRepository,
+        IUserPhoneRepository $iUserPhoneRepository,
+        IUserSubscriptionRepository $iUserSubscriptionRepository
     )
     {
         parent::__construct($logger, $iDatabaseRepository);
@@ -38,5 +47,8 @@ abstract class SubscriptionAction extends Action
         $this->iPaymentRepository = $iPaymentRepository;
         $this->iPaymentMethodRepository = $iPaymentMethodRepository;
         $this->stripe = $stripe;
+        $this->iUserEmailRepository = $iUserEmailRepository;
+        $this->iUserPhoneRepository = $iUserPhoneRepository;
+        $this->iUserSubscriptionRepository = $iUserSubscriptionRepository;
     }
 }

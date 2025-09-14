@@ -54,18 +54,18 @@ class PaymentMethod implements JsonSerializable
     {
         return [
 			"id" => $this->id,
-			"user_id" => $this->user_id,
-			"stripe_payment_method_id" => $this->stripe_payment_method_id,
+			"userId" => $this->user_id,
+			"stripePaymentMethodId" => $this->stripe_payment_method_id,
 			"type" => $this->type,
 			"brand" => $this->brand,
 			"last4" => $this->last4,
-			"exp_month" => $this->exp_month,
-			"exp_year" => $this->exp_year,
-			"is_default" => $this->is_default,
-			"is_active" => $this->is_active,
-			"created_at" => $this->created_at,
-			"updated_at" => $this->updated_at,
-			"deleted_at" => $this->deleted_at
+			"expMonth" => $this->exp_month,
+			"expYear" => $this->exp_year,
+			"isDefault" => $this->is_default,
+			"isActive" => $this->is_active,
+			"createdAt" => $this->created_at,
+			"updatedAt" => $this->updated_at,
+			"deletedAt" => $this->deleted_at
         ];
     }
 }

@@ -1,34 +1,28 @@
 <?php
 
 declare(strict_types=1);
-namespace App\Repository\PaymentMethod;
+namespace App\Repository\PetDocument;
 
 use App\Traits\Helper;
 use App\Model\Database;
-use App\Model\PaymentMethod;
+use App\Model\PetDocument;
 
-class PaymentMethodRepository implements IPaymentMethodRepository {
+class PetDocumentRepository implements IPetDocumentRepository {
 	use Helper;
 
     /**
-     * @var PaymentMethod[]
+     * @var PetDocument[]
      */
     private array $registers = [];
 	private Database $database;
-	private string $table = "payment_method";
+	private string $table = "pet_document";
 	private array $columns = [
 		"id",
-		"user_id",
-		"stripe_payment_method_id",
-		"type",
-		"brand",
-		"last4",
-		"exp_month",
-		"exp_year",
-		"is_default",
-		"is_active",
+		"pet_id",
+		"title",
+		"document",
+		"document_length",
 		"created_at",
-		"updated_at",
 		"deleted_at"
 	];
 
@@ -40,21 +34,19 @@ class PaymentMethodRepository implements IPaymentMethodRepository {
     }
 
 	public function findById(int $id) {
-		if(!$registers = $this->database->select("*", $this->table, "id = $id", "deleted_at IS NULL", "", 1)) return $registers;
+		if(!$registers = $this->database->select("*", $this->table, "id = $id", "deleted_at IS NULL")) return $registers;
 		
 		return $this->getObject($registers);
 	}
 
-	public function findByUserId(int $id) {
-		if(!$registers = $this->database->select("*", $this->table, "user_id = $id", "deleted_at IS NULL", "is_default, created_at")) return $registers;
+	public function findByPetId(int $id) {
+		if(!$registers = $this->database->select("*", $this->table, "pet_id = $id", "deleted_at IS NULL")) return $registers;
 		
 		return $this->getObject($registers);
 	}
 
-	public function findDefaultByUserId(int $id) {
-		if(!$registers = $this->database->select("*", $this->table, "user_id = $id", "is_default = TRUE AND deleted_at IS NULL", "", 1)) return $registers;
-		
-		return $this->getObject($registers);
+	public function findTotal(int $id) {
+		return $this->database->runRow("SELECT id FROM {$this->table} WHERE pet_id = $id AND deleted_at IS NULL");
 	}
 
 	public function insert(array $data){
@@ -67,7 +59,7 @@ class PaymentMethodRepository implements IPaymentMethodRepository {
 	}
 
 	public function update(array $data, string $where, string $and = ""){
-		$data = $this->database->update($this->table, $data, $where,$and);
+		$data = $data = $this->database->update($this->table, $data, $where,$and);
 		return $this->getObject($data);
 	}
 
@@ -77,20 +69,14 @@ class PaymentMethodRepository implements IPaymentMethodRepository {
 
 	private function getObject(array $data){
 		foreach ($data as $v){
-			$this->registers[$v[$this->columns[0]]] = new PaymentMethod(
+			$this->registers[$v[$this->columns[0]]] = new PetDocument(
 				(int) $v[$this->columns[0]],
 				(int) $v[$this->columns[1]],
 				(string) $v[$this->columns[2]],
 				(string) $v[$this->columns[3]],
 				(string) $v[$this->columns[4]],
 				(string) $v[$this->columns[5]],
-				(int) $v[$this->columns[6]],
-				(int) $v[$this->columns[7]],
-				(bool) $v[$this->columns[8]],
-				(bool) $v[$this->columns[9]],
-				(string) $v[$this->columns[10]],
-				(string) $v[$this->columns[11]],
-				(string) $v[$this->columns[12]],
+				(string) $v[$this->columns[6]],
 			);
 		}
 
@@ -101,27 +87,27 @@ class PaymentMethodRepository implements IPaymentMethodRepository {
 	}
 };
 
-interface IPaymentMethodRepository {
+interface IPetDocumentRepository {
 	/**
 	 * Summary of findById
 	 * @param int $id
-	 * @return array|PaymentMethod
+	 * @return array|PetDocument
 	 */
 	public function findById(int $id);
 
 	/**
-	 * Summary of findByUserId
+	 * Summary of findByPetId
 	 * @param int $id
-	 * @return array|PaymentMethod
+	 * @return array|PetDocument
 	 */
-	public function findByUserId(int $id);
+	public function findByPetId(int $id);
 
 	/**
-	 * Summary of findDefaultByUserId
+	 * Summary of findTotal
 	 * @param int $id
-	 * @return array|PaymentMethod
+	 * @return int
 	 */
-	public function findDefaultByUserId(int $id);
+	public function findTotal(int $id);
 
 	/**
 	 * Summary of insert

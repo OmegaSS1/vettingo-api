@@ -37,9 +37,10 @@ class UpdateUser extends UserAction {
                 $this->vettingoBucket->delete($oldAvatar);
             }
         } catch (Exception $e) {
-            if(!empty($form["avatar"]))
+            if($form["avatar"])
                 $this->vettingoBucket->delete($form["avatar"]);
 
+            $this->loggerInterface->info("Falha ao tentar atualizar o profissional", ["message" => $e->getMessage(), "code" => $e->getCode(), "line" => $e->getLine(), "file" => $e->getFile()]);
             throw new Exception($e->getMessage(), $e->getCode());
         }
 

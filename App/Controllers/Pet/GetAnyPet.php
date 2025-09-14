@@ -12,7 +12,6 @@ class GetAnyPet extends PetAction {
         $id = $this->validate();
         
         $pets = $this->iPetRepository->findById($id);
-        $pets = is_array($pets) ? $pets : [$pets];
         $this->toArray($pets);
 
         return $this->respondWithData($pets);

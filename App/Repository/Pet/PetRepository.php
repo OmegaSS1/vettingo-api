@@ -54,8 +54,8 @@ class PetRepository implements IPetRepository {
 		return $this->getObject($registers);
 	}
 
-	public function findByPedigreeNumber(int $id) {
-		if(!$registers = $this->database->select("*", $this->table, "pedigree_number = $id", "\"isActive\" = TRUE")) return $registers;
+	public function findByPedigreeNumber(string $number) {
+		if(!$registers = $this->database->select("*", $this->table, "pedigree_number = $number", "\"isActive\" = TRUE")) return $registers;
 		
 		return $this->getObject($registers);
 	}
@@ -124,10 +124,10 @@ interface IPetRepository {
 
 	/**
 	 * Summary of findByPedigreeNumber
-	 * @param int $id
+	 * @param string $number
 	 * @return array|Pet
 	 */
-	public function findByPedigreeNumber(int $id);
+	public function findByPedigreeNumber(string $number);
 
 	/**
 	 * Summary of insert

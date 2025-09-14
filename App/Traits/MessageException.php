@@ -107,6 +107,22 @@ trait MessageException
         };
     }
 
+    public static function PET_DOCUMENT_NOT_FOUND(): Exception
+    {
+        return new class extends Exception {
+            protected $message = "Nenhum documento localizado para este pet";
+            protected $code = 404;
+        };
+    }
+
+    public static function PET_VACCINE_NOT_FOUND(): Exception
+    {
+        return new class extends Exception {
+            protected $message = "Nenhum documento localizado para este pet";
+            protected $code = 404;
+        };
+    }
+
     public static function TUTOR_NOT_FOUND(?int $id): Exception
     {
         return new class($id) extends Exception {

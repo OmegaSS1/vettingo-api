@@ -23,15 +23,18 @@ use App\Controllers\Location\{
 	CitiesByState
 };
 use App\Controllers\Subscription\{
-	GetAllSubscriptions,InsertUserSubscription,
-	GetUserPaymentMethods, GetUserDefaultPaymentMethods, InsertUserPaymentMethod,
-	GetUserPayment, GetAnyUserPayment
+	GetAllSubscriptions,CreateSubscription,
+	CreateSetupIntent, GetUserPaymentMethods, GetUserDefaultPaymentMethods, UpdateDefaultPaymentMethods, DeletePaymentMethods,
+	CreatePaymentMethod,
+	GetUserPayment, GetAnyUserPayment,
 };
 use App\Controllers\Webhook\PaymentStatus;
 use App\Controllers\Pet\{
-	GetUserPet,InsertUserPet,
-	GetPetTypes,
-	GetAnyPet
+	GetPet,InsertPet,UpdatePet,DeletePet,
+	GetPetTypes,GetAnyPet,GetOverviewPet,
+	GetPetByOwner,
+	GetDocumentPet, InsertDocumentPet, DeleteDocumentPet,
+	GetVaccinePet, InsertVaccinePet, DeleteVaccinePet, GetStatusVaccinePet
 	};
 
 return function (App $app): void {
@@ -98,14 +101,33 @@ return function (App $app): void {
 	});
 
 	// Pet
-	$app->group('', function(Group $pet) {		
-		$pet->group('/pet-types', function(Group $petType) {		
-			$petType->get('/active', GetPetTypes::class);
+	$app->group('', function(Group $pet) use($logger) {		
+		$pet->group('/pet-types', function(Group $type) {		
+			$type->get('/active', GetPetTypes::class);
 		});
-		$pet->group('/pets', function(Group $pet) {		
-			$pet->post('', InsertUserPet::class);
-			$pet->get('', GetUserPet::class);
-			$pet->get('/{id}', GetAnyPet::class);
+
+		$pet->group('/pet-document', function(Group $document) {		
+			$document->get('/{id}', GetDocumentPet::class);
+			$document->post('/{id}', InsertDocumentPet::class);
+			$document->delete('/{id}', DeleteDocumentPet::class);
+		});
+
+		$pet->group('/pet-vaccine', function(Group $vaccine) {		
+			$vaccine->get('/status', GetStatusVaccinePet::class);
+			$vaccine->get('/{id}', GetVaccinePet::class);
+			$vaccine->post('/{id}', InsertVaccinePet::class);
+			$vaccine->delete('/{id}', DeleteVaccinePet::class);
+			//$petDocument->delete('/{id}', DeleteDocumentPet::class);
+		});
+
+		$pet->group('/pets', function(Group $pets) use($logger) {		
+			$pets->post('', InsertPet::class);
+			$pets->get('', GetPet::class);
+			$pets->get('/owner/{ownerid}', GetPetByOwner::class)->add(new AuthenticationUserRole('ADMIN', $logger));
+			$pets->get('/overview/{id}', GetOverviewPet::class);
+			$pets->get('/{id}', GetAnyPet::class);
+			$pets->put('/{id}', UpdatePet::class);
+			$pets->delete('/{id}', DeletePet::class);
 		});
 	})->add(AuthenticationUser::class);
 
@@ -113,19 +135,23 @@ return function (App $app): void {
 	$app->group('', function(Group $subscription) {
 		$subscription->group('/subscriptions', function(Group $subscription) {
 			$subscription->get('/me', UserSubscription::class);
-			$subscription->post('/me', InsertUserSubscription::class);
+			$subscription->post('', CreateSubscription::class);
 		})->add(AuthenticationUser::class); 
 		$subscription->get('/subscription-plans', GetAllSubscriptions::class);
 
 		$subscription->group('/payment-methods', function(Group $payments) {
 			$payments->get('/user/me', GetUserPaymentMethods::class);
 			$payments->get('/user/me/default', GetUserDefaultPaymentMethods::class);
-			$payments->post('/user/me', InsertUserPaymentMethod::class);
+			$payments->post('/create-setup-intent', CreateSetupIntent::class);
+			$payments->put('/{id}/default', UpdateDefaultPaymentMethods::class);
+			$payments->delete('/{id}', DeletePaymentMethods::class);
+
+			$payments->post('', CreatePaymentMethod::class);
 		})->add(AuthenticationUser::class);
 
 		$subscription->group('/payments', function(Group $payments) {
 			$payments->get('/user/me', GetUserPayment::class);
-			$payments->get('/user/{id}', GetAnyUserPayment::class);
+			//$payments->get('/user/{id}', GetAnyUserPayment::class);
 			//$payments->get('/user/me/default', GetUserDefaultPaymentMethods::class);
 		})->add(AuthenticationUser::class);
 	});

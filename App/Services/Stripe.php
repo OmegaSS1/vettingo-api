@@ -32,61 +32,61 @@ class Stripe {
         ]);
     }
 
-    /**
-     * Summary of createUniquePrice
-     * @param int $price
-     * @param array $productData
-     * @param string $currency
-     * @return Price
-     */
-    public function createUniquePrice(int $price, array $productData, string $currency = "brl"){
-        return Price::create([
-            "unit_amount" => $price,
-            "currency" => $currency,
-            "product_data" => $productData,
-        ]);
-    }
+    // /**
+    //  * Summary of createUniquePrice
+    //  * @param int $price
+    //  * @param array $productData
+    //  * @param string $currency
+    //  * @return Price
+    //  */
+    // public function createUniquePrice(int $price, array $productData, string $currency = "brl"){
+    //     return Price::create([
+    //         "unit_amount" => $price,
+    //         "currency" => $currency,
+    //         "product_data" => $productData,
+    //     ]);
+    // }
 
-    /**
-     * Summary of createRecurringPrice
-     * @param int $price
-     * @param array $productData
-     * @param string $interval
-     * @param string $currency
-     * @return Price
-     */
-    public function createRecurringPrice(int $price, array $productData, string $interval = "month", string $currency = "brl"){
-        return Price::create([
-            "unit_amount" => $price,
-            "currency" => $currency,
-            "recurring" => [
-                "interval" => $interval
-            ],
-            "product_data" => $productData,
-        ]);
-    }
+    // /**
+    //  * Summary of createRecurringPrice
+    //  * @param int $price
+    //  * @param array $productData
+    //  * @param string $interval
+    //  * @param string $currency
+    //  * @return Price
+    //  */
+    // public function createRecurringPrice(int $price, array $productData, string $interval = "month", string $currency = "brl"){
+    //     return Price::create([
+    //         "unit_amount" => $price,
+    //         "currency" => $currency,
+    //         "recurring" => [
+    //             "interval" => $interval
+    //         ],
+    //         "product_data" => $productData,
+    //     ]);
+    // }
 
-    /**
-     * Summary of createUniquePayment
-     * @param string $customerId
-     * @param string $priceId
-     * @param string $successUrl
-     * @param string $cancelUrl
-     * @return Checkout
-     */
-    public function createUniquePayment(string $customerId, string $priceUniqueId, string $successUrl, string $cancelUrl) {
-        return Checkout::create([
-            "mode" => "payment",
-            "payment_method_types" => ["card"],
-            "customer" => $customerId,
-            'line_items' => [[
-                'price' => $priceUniqueId,
-                'quantity' => 1,
-            ]],
-            'success_url' => $successUrl,
-            'cancel_url' => $cancelUrl,
-        ]);
-    }
+    // /**
+    //  * Summary of createUniquePayment
+    //  * @param string $customerId
+    //  * @param string $priceId
+    //  * @param string $successUrl
+    //  * @param string $cancelUrl
+    //  * @return Checkout
+    //  */
+    // public function createUniquePayment(string $customerId, string $priceUniqueId, string $successUrl, string $cancelUrl) {
+    //     return Checkout::create([
+    //         "mode" => "payment",
+    //         "payment_method_types" => ["card"],
+    //         "customer" => $customerId,
+    //         'line_items' => [[
+    //             'price' => $priceUniqueId,
+    //             'quantity' => 1,
+    //         ]],
+    //         'success_url' => $successUrl,
+    //         'cancel_url' => $cancelUrl,
+    //     ]);
+    // }
 
     /**
      * Summary of createRecurringPayment
@@ -94,14 +94,24 @@ class Stripe {
      * @param string $priceRecurringId
      * @return Subscription
      */
-    public function createRecurringPayment(string $customerId, string $priceRecurringId, string $paymentId) {
-        return Subscription::create([
-            "customer" => $customerId,
-            'items' => [[
-                'price' => $priceRecurringId,
-            ]],
-            "default_payment_method" => $paymentId
+    public function createSubscription(array $subscriptionData) {
+        return Subscription::create($subscriptionData);
+    }
+
+    public function listPrices(){
+        return Price::all([
+            "active" => true,
+            "limit" => 100
         ]);
+    }
+
+    public function setPaymentMethodToCustomer(string $paymentMethodId, string $customerId){
+        $payment = PaymentMethod::retrieve($paymentMethodId);
+        $payment->attach(["customer" => $customerId]);
+    }
+
+    public function retrieveCustomer(string $customerId){
+        return Customer::retrieve($customerId);
     }
 
     /**
@@ -109,10 +119,10 @@ class Stripe {
      * @param int $customerId
      * @return SetupIntent
      */
-    public function createPaymentMethod(string $customerId){
+    public function createSetupIntent(array $metadata){
         return SetupIntent::create([
-            "customer" => $customerId,
-            "payment_method_types" => ["card"]
+            "payment_method_types" => ["card"],
+            "metadata" => $metadata
         ]);
     }
 

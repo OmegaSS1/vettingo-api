@@ -9,7 +9,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Exception;
 
 
-class InsertUserPet extends PetAction {
+class InsertPet extends PetAction {
 
     protected function action(): Response {
 
@@ -32,7 +32,7 @@ class InsertUserPet extends PetAction {
                 "owner_id" => $this->USER->sub,
                 "pet_type_id"=> $form["petTypeId"],
                 "breed"=> $form["breed"] ?? "",
-                "birth_date"=> $form["birthDate"] ?? NULL,
+                "birth_date"=> $form["birthDate"],
                 "gender"=> $form["gender"] ?? "O",
                 "weight"=> $form["weight"] ?? "",
                 "has_pedigree"=> $form["hasPedigree"],
@@ -69,14 +69,19 @@ class InsertUserPet extends PetAction {
         else if(!$petTypeId || !$this->iPetTypeRepository->findById($petTypeId)){
             throw MessageException::PET_TYPE_NOT_FOUND(null);
         }
-        else if(!empty($form["birthDate"])){
+        else if($form["birthDate"]){
             try {
+                $form["birthDate"] = $this->convertDate($form["birthDate"]);
+
                 if(new DateTimeImmutable($form["birthDate"]) > new DateTimeImmutable('today')){
                     throw new Exception("Data de nascimento não pode ser no futuro", 400);
                 }
             } catch (Exception $e) {
                     throw new Exception("Data de nascimento inválida.", 400);
             }
+        }
+        else {
+            $form["birthDate"] = NULL;
         }
 
         $allowedValues = [true, false];
@@ -88,7 +93,7 @@ class InsertUserPet extends PetAction {
             $form["hasPedigree"] = 'TRUE';
             $this->validKeysForm($form, ["pedigreeNumber"], ["Numero do Pedigree"]);
             if($this->iPetRepository->findByPedigreeNumber($form["pedigreeNumber"])){
-                throw MessageException::ALREADY_EXISTS("Pedigree Number");
+                throw MessageException::ALREADY_EXISTS("Numero do Pedigree");
             }
         }else {
             $form["hasPedigree"] = 'FALSE';

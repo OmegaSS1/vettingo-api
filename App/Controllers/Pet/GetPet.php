@@ -6,7 +6,7 @@ namespace App\Controllers\Pet;
 use App\Traits\MessageException;
 use Psr\Http\Message\ResponseInterface as Response;
 
-class GetUserPet extends PetAction {
+class GetPet extends PetAction {
 
     protected function action(): Response {
         $this->validate();

@@ -293,10 +293,12 @@ trait Helper {
 			if($data === false){
 				throw new Exception('Formato Base64 inválido.',400);
 			}
-
+			$length = strlen($data) / 1024 / 1024;
+			$length = number_format($length, 2);
+			
 			$filename = pathinfo($filename, PATHINFO_BASENAME) . "." . $ext;
 
-			return [$filename, $data];
+			return [$filename, $data, $length];
 		}
 		else {
     		throw new Exception('String base64 inválida.');
@@ -305,5 +307,23 @@ trait Helper {
 
 	public function validateTime(string $time){
 		return preg_match("/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/", $time);
+	}
+
+	public function convertDate(string $date){
+		$newDate = NULL;
+		$regexMap = [
+			    'd-m-Y' => '/^\d{2}-\d{2}-\d{4}$/',
+				'dmY'   => '/^\d{8}$/',
+				'd/m/Y' => '/^\d{2}\/\d{2}\/\d{4}$/',
+				'Y/m/d' => '/^\d{4}\/\d{2}\/\d{2}$/',
+			    'Y-m-d' => '/^\d{4}-\d{2}-\d{2}$/',
+		];
+
+		foreach($regexMap as $key => $value){
+			if(preg_match($value, $date)){
+				$newDate = DateTime::createFromFormat($key, $date);
+				return $newDate->format('Y-m-d');
+			}
+		}
 	}
 }
