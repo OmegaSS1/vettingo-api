@@ -48,8 +48,10 @@ class CreatePetSchedulingDashboard extends PetAction {
         }
         
         if($petConsult = $this->iPetConsultRepository->findByConsultationDate($form["consultationDate"])){
-            if($petConsult->getStatus() == "AGUARDANDO" && $petConsult->getVetId() == $vet->getId())
-                throw new Exception("Você já possui um agendamento marcado com este veterinario neste dia!", 400);
+            foreach($petConsult as $consult){
+                if($consult->getStatus() == "AGUARDANDO" && $consult->getVetId() == $vet->getId())
+                    throw new Exception("Você já possui um agendamento marcado com este veterinario neste dia!", 400);
+            }
         }
         
         $form["consultationDate"] = $this->convertDate($form["consultationDate"]);

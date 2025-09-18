@@ -24,7 +24,7 @@ class GetVetSchedules extends VeterinarianAction {
         if(!$id || !$user = $this->iUserRepository->findById($id)){
             throw MessageException::USER_NOT_FOUND($id ?? null);
         }
-        else if(!$user->getStatus()){
+        else if(!$user->getIsActive()){
             throw MessageException::USER_NOT_FOUND($id ?? null);
         }
         else if(!$vet = $this->iVeterinarianRepository->findByUserId($id)){

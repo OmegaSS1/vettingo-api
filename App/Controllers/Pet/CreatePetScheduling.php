@@ -12,13 +12,13 @@ class CreatePetScheduling extends PetAction {
 
     protected function action(): Response {
         $form = $this->post();
-        $vet = $this->validate($form);
+        $this->validate($form);
 
         $pet = $this->iPetConsultRepository->insert([
             "pet_id" => $form["petId"],
             "tutor_name" => $form["tutorName"],
             "pet_name" => $form["petName"],
-            "vet_id" => $vet->getId(),
+            "vet_id" => $form["vetId"],
             "consultation_date" => $form["consultationDate"],
             "reason" => $form["reason"] ?? "",
             "status" => "AGUARDANDO"
@@ -31,7 +31,7 @@ class CreatePetScheduling extends PetAction {
     private function validate(array &$form){
         $this->validKeysForm($form,
     ["tutorName","petName","consultationDate","petId","vetWorkId","time"],
-["Tutor","Pet","Data da consulta","Consultorio","Pet","Horario da consulta"]);
+["Tutor","Pet","Data da consulta","Pet","Consultorio","Horario da consulta"]);
 
         $idVetWork = filter_var($form["vetWorkId"], FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
         $idPet = filter_var($form["petId"], FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
@@ -40,7 +40,7 @@ class CreatePetScheduling extends PetAction {
         if(!$id || !$user = $this->iUserRepository->findById($id)){
             throw MessageException::USER_NOT_FOUND($id ?? null);
         }
-        else if(!$idPet || !$pet = $this->iPetRepository->findById($id)){
+        else if(!$idPet || !$pet = $this->iPetRepository->findById($idPet)){
             throw MessageException::PET_NOT_FOUND($id ?? null);
         }
         else if(!$idVetWork || !$vetWork = $this->iVetWorkLocationRepository->findById($idVetWork)){
@@ -52,13 +52,18 @@ class CreatePetScheduling extends PetAction {
         else if(!$vet = $this->iVeterinarianRepository->findById($vetWork->getVeterinarianId())){
             throw MessageException::VETERINARIAN_NOT_FOUND(null);
         }
-        else if(!$user = $this->iUserRepository->findById($vet->getUserId())){
-            throw MessageException::USER_NOT_FOUND(null);
+        else if(!$this->iUserRepository->findById($vet->getUserId())){
+            throw MessageException::VETERINARIAN_NOT_FOUND(null);
+        }
+        else if($user->getId() != $pet->getOwnerId()){
+            throw new Exception("O pet selecionado não pertence a este tutor", 400);
         }
         
         if($petConsult = $this->iPetConsultRepository->findByConsultationDate($form["consultationDate"])){
-            if($petConsult->getStatus() == "AGUARDANDO" && $petConsult->getVetId() == $vet->getId() && $pet->getId() == $petConsult->getPetId()){
-                throw new Exception("Você já possui um agendamento marcado com este veterinario neste dia!", 400);
+            foreach($petConsult as $consult){
+                if($consult->getStatus() == "AGUARDANDO" && $consult->getVetId() == $vet->getId() && $pet->getId() == $consult->getPetId()){
+                    throw new Exception("Você já possui um agendamento marcado com este veterinario neste dia!", 400);
+                }
             }
         }
         
@@ -96,6 +101,7 @@ class CreatePetScheduling extends PetAction {
 
         $form["consultationDate"] = (new DateTime("{$form["consultationDate"]} {$form["time"]}"))->format('Y-m-d H:i:s');
         $form["petId"] = $pet->getId();
+        $form["vetId"] = $vet->getId();
 
         return $vet;
     }

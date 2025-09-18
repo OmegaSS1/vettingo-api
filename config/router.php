@@ -18,7 +18,7 @@ use App\Controllers\Veterinarian\{
 	GetVetWorkLocationSchedule, InsertVetWorkLocationSchedule, UpdateVetWorkLocationSchedule, DeleteVetWorkLocationSchedule,
 	GetVetReviews, GetAnyVetReviews,
 	GetVetDashboard,
-	GetVetSchedules
+	GetVetSchedules, UpdateVetSchedules
 };
 use App\Controllers\Location\{
 	State,
@@ -69,7 +69,7 @@ return function (App $app): void {
 		$users->put('/me/emails/{id}', UpdateEmailUser::class);
 		$users->delete('/me/emails/{id}', DeleteEmailUser::class);
 		$users->post('/me/emails', InsertEmailUser::class);
-	})->add(new AuthenticationUserRole('USER', $logger))->add(AuthenticationUser::class);
+	})->add(AuthenticationUser::class);
 
 	// Veterinarian
 	$app->group('', function(Group $vet) {		
@@ -101,6 +101,7 @@ return function (App $app): void {
 
 		$vet->group('/vet-schedules', function(Group $scheduling) {		
 			$scheduling->get('', GetVetSchedules::class);
+			$scheduling->put('/{id}', UpdateVetSchedules::class);
 		});
 
 		

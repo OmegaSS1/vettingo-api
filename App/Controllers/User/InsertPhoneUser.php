@@ -13,7 +13,6 @@ class InsertPhoneUser extends UserAction {
         $form = $this->post();
         $this->validate($form);
 
-        $this->iDatabaseRepository->disableCommit();
         $user = $this->iUserPhoneRepository->insert([
             "number" => $form["number"],
             '"areaCode"'=> $form["areaCode"],
