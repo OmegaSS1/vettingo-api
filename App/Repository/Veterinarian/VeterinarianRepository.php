@@ -48,6 +48,59 @@ class VeterinarianRepository implements IVeterinarianRepository {
 		return $this->getObject($registers);
 	}
 
+	public function findPreviewDashboard(int $id, int $cityId){
+		$query = "with work as (
+					select 
+						vwl.id,
+						vwl.city_id,
+						vwl.veterinarian_id,
+						vwl.name,
+						vwl.address,
+						vwl.number,
+						vwl.complement,
+						vwl.neighborhood,
+						vwl.zip_code,
+						jsonb_agg(
+							json_build_object(
+								case
+									when day_of_week = 1 then 'Segunda-Feira'
+									when day_of_week = 2 then 'Terça-Feira'
+									when day_of_week = 3 then 'Quarta-Feira'
+									when day_of_week = 4 then 'Quinta-Feira'
+									when day_of_week = 5 then 'Sexta-Feira'
+									when day_of_week = 6 then 'Sabado-Feira'
+									when day_of_week = 0 then 'Domingo-Feira'
+								end,
+								concat(start_time, ' - ', end_time)
+							)
+						) schedule
+					from vet_work_location vwl
+					join vet_work_location_schedule vwls on vwls.vet_work_location_id = vwl.id and vwls.\"isActive\" = true
+					where vwl.\"isActive\" = true
+					group by vwl.id, vwl.city_id, vwl.veterinarian_id,vwl.name,vwl.address,vwl.number,vwl.complement,vwl.neighborhood,vwl.zip_code
+				) select 
+				 	work.id,
+					CONCAT(u.first_name,' ',u.last_name) name,
+					v.avatar,
+					v.bio,
+					v.domiciliary_attendance domiciliaryAttendance,
+					v.emergencial_attendance emergencialAttendance,
+					work.name,
+					work.address,
+					work.number,
+					work.complement,
+					work.neighborhood,
+					work.zip_code zipCode,
+					work.schedule
+				from public.user u
+				join veterinarian v on v.user_id = u.id
+				join work on work.veterinarian_id = v.id and work.city_id = $cityId
+				where u.id = $id
+				and u.\"isActive\" = true";
+		
+		return $this->database->runSelect($query);
+	}
+
 	public function findByUserId(int $id) {
 		if(!$registers = $this->database->select("*", $this->table, "user_id = $id", '"isActive" = TRUE AND deleted_at IS NULL')) return $registers;
 
@@ -112,6 +165,14 @@ interface IVeterinarianRepository {
 	 * @return array|Veterinarian
 	 */
 	public function findById(int $id);
+
+	/**
+	 * Summary of findPreviewDashboard
+	 * @param int $id
+	 * @param int $cityId
+	 * @return array|Veterinarian
+	 */
+	public function findPreviewDashboard(int $id, int $cityId);
 
 	/**
 	 * Summary of findByUserId

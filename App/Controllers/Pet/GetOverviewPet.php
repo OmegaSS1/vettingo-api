@@ -14,7 +14,8 @@ class GetOverviewPet extends PetAction {
         
         $data = [
             "document" => $this->iPetDocumentRepository->findTotal($pet->getId()),
-            "vaccine" => $this->iPetVaccineRepository->findTotal($pet->getId())
+            "vaccine" => $this->iPetVaccineRepository->findTotal($pet->getId()),
+            "schedules" => $this->iPetConsultRepository->findTotal($pet->getId()),
         ];
 
         return $this->respondWithData($data);

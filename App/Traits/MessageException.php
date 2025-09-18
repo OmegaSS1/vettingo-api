@@ -84,7 +84,7 @@ trait MessageException
     {
         return new class($id) extends Exception {
             public function __construct(?int $id){
-                parent::__construct("Nenhum veterinário encontrado para o usuário $id", 404);
+                parent::__construct("Nenhum veterinário encontrado", 404);
             }
         };
     }
@@ -136,7 +136,7 @@ trait MessageException
     {
         return new class($id) extends Exception {
             public function __construct(?int $id){
-                parent::__construct("Nenhum usuario encontrado para o usuário $id", 404);
+                parent::__construct("Nenhum usuario encontrado", 404);
             }
         };
     }

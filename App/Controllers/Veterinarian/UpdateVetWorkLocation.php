@@ -23,8 +23,8 @@ class UpdateVetWorkLocation extends VeterinarianAction {
             "zip_code" => $form["zipCode"],
             '"isActive"' => 'TRUE',
             "complement" => $form["complement"] ?? "",
-            "latitude" => $form["latitude"] ?? NULL,
-            "longitude" => $form["longitude"] ?? NULL
+            "latitude" => $form["latitude"] ?? null,
+            "longitude" => $form["longitude"] ?? null
         ], "id = $id", "\"isActive\" = TRUE AND deleted_at IS NULL");
 
         $this->toArray($vet);
@@ -70,10 +70,10 @@ class UpdateVetWorkLocation extends VeterinarianAction {
         else if(!preg_match("/^\d{5}-?\d{3}$/", $form["zipCode"])){
             throw MessageException::CEP_INVALIDO();
         }
-        else if(!preg_match("/^(-?[0-8]?\d(\.\d+)?|90(\.0+)?)$/", (string) $form["latitude"])){
+        else if(isset($form["latitude"]) && !preg_match("/^(-?[0-8]?\d(\.\d+)?|90(\.0+)?)$/", (string) $form["latitude"])){
             throw MessageException::LATITUDE_INVALID();
         }
-        else if(!preg_match("/^(-?(1[0-7]\d|[0-9]?\d)(\.\d+)?|180(\.0+)?)$/", (string) $form["longitude"])){
+        else if(isset($form["longitude"]) && !preg_match("/^(-?(1[0-7]\d|[0-9]?\d)(\.\d+)?|180(\.0+)?)$/", (string) $form["longitude"])){
             throw MessageException::LONGITUDE_INVALID();
         }
 

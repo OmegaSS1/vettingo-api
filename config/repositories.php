@@ -14,6 +14,7 @@ use App\Repository\Payment\{IPaymentRepository, PaymentRepository};
 use App\Repository\PaymentAttempt\{IPaymentAttemptRepository, PaymentAttemptRepository};
 use App\Repository\PaymentMethod\{IPaymentMethodRepository, PaymentMethodRepository};
 use App\Repository\Pet\{IPetRepository, PetRepository};
+use App\Repository\PetConsult\{IPetConsultRepository, PetConsultRepository};
 use App\Repository\PetDocument\{IPetDocumentRepository, PetDocumentRepository};
 use App\Repository\PetType\{IPetTypeRepository, PetTypeRepository};
 use App\Repository\PetTypeCategory\{IPetTypeCategoryRepository, PetTypeCategoryRepository};
@@ -57,6 +58,7 @@ return function (ContainerBuilder $container) {
         IPaymentAttemptRepository::class               => \DI\autowire(PaymentAttemptRepository::class),
         IPaymentMethodRepository::class                => \DI\autowire(PaymentMethodRepository::class),
         IPetRepository::class                          => \DI\autowire(PetRepository::class),
+        IPetConsultRepository::class                   => \DI\autowire(PetConsultRepository::class),
         IPetDocumentRepository::class                  => \DI\autowire(PetDocumentRepository::class),
         IPetTypeRepository::class                      => \DI\autowire(PetTypeRepository::class),
         IPetTypeCategoryRepository::class              => \DI\autowire(PetTypeCategoryRepository::class),

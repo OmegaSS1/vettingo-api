@@ -19,6 +19,16 @@ CREATE TABLE pet_consult (
     weight DECIMAL(5,2),        -- peso do pet no dia da consulta
     temperature DECIMAL(4,1),   -- temperatura corporal
     
+    status pet_consult_status
     created_at TIMESTAMP DEFAULT now(),
     updated_at TIMESTAMP DEFAULT now()
 );
+
+veterinario
+Manuel Guilherme
+manuel_guilherme_moraes@yopmail.com
+686.108.527-84
+
+pm_1S8EU66aUFqQ4eZQMXI8dIzh
+
+cSleMMnF

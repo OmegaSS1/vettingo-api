@@ -12,6 +12,7 @@ use App\Repository\UserSubscription\IUserSubscriptionRepository;
 use App\Repository\Veterinarian\IVeterinarianRepository;
 use App\Repository\VeterinarianApprovalPending\IVeterinarianApprovalPendingRepository;
 use App\Repository\WebhookEvent\IWebhookEventRepository;
+use App\Services\Stripe;
 use Psr\Log\LoggerInterface;
 
 abstract class WebhookAction extends Action
@@ -24,6 +25,7 @@ abstract class WebhookAction extends Action
     protected IVeterinarianApprovalPendingRepository $iVeterinarianApprovalPendingRepository;
     protected IPaymentRepository $iPaymentRepository;
     protected ISubscriptionPlanRepository $iSubscriptionPlanRepository;
+    protected Stripe $stripe;
     
     public function __construct (
         LoggerInterface $logger,
@@ -34,7 +36,8 @@ abstract class WebhookAction extends Action
         IVeterinarianRepository $iVeterinarianRepository,
         IVeterinarianApprovalPendingRepository $iVeterinarianApprovalPendingRepository,
         IPaymentRepository $iPaymentRepository,
-        ISubscriptionPlanRepository $iSubscriptionPlanRepository
+        ISubscriptionPlanRepository $iSubscriptionPlanRepository,
+        Stripe $stripe
     )
     {
         parent::__construct($logger, $iDatabaseRepository);
@@ -45,5 +48,6 @@ abstract class WebhookAction extends Action
         $this->iUserSubscriptionRepository = $iUserSubscriptionRepository;
         $this->iPaymentRepository = $iPaymentRepository;
         $this->iSubscriptionPlanRepository = $iSubscriptionPlanRepository;
+        $this->stripe = $stripe;
     }
 }

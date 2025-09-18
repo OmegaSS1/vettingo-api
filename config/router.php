@@ -10,23 +10,26 @@ use App\Controllers\User\{
 	GetPhoneUser,InsertPhoneUser,UpdatePhoneUser,DeletePhoneUser,
 	GetEmailUser,InsertEmailUser,UpdateEmailUser,DeleteEmailUser
 };
-use App\Controllers\Auth\{Register,Login, ChangePassword};
+use App\Controllers\Auth\{Register,Login, ChangePassword, ForgotPassword, NewPassword};
 use App\Controllers\Veterinarian\{
-	GetVeterinarian,InsertVeterinarian,UpdateVeterinarian,
+	GetVeterinarian,GetAnyVetWorkLocation,InsertVeterinarian,UpdateVeterinarian,
 	VeterinarianApprovalStatus,UpdateDocumentVeterinarian,
 	GetVetWorkLocation,InsertVetWorkLocation,UpdateVetWorkLocation,DeleteVetWorkLocation,
 	GetVetWorkLocationSchedule, InsertVetWorkLocationSchedule, UpdateVetWorkLocationSchedule, DeleteVetWorkLocationSchedule,
-	GetVetReviews, GetAnyVetReviews
+	GetVetReviews, GetAnyVetReviews,
+	GetVetDashboard,
+	GetVetSchedules
 };
 use App\Controllers\Location\{
 	State,
 	CitiesByState
 };
 use App\Controllers\Subscription\{
-	GetAllSubscriptions,CreateSubscription,
-	CreateSetupIntent, GetUserPaymentMethods, GetUserDefaultPaymentMethods, UpdateDefaultPaymentMethods, DeletePaymentMethods,
-	CreatePaymentMethod,
-	GetUserPayment, GetAnyUserPayment,
+	GetAllSubscriptions,CreatePlan,
+	CreateSetupIntent,CreateSubscription,DeleteSubscription,
+	CreatePaymentMethods,GetUserPaymentMethods,GetUserDefaultPaymentMethods,UpdateDefaultPaymentMethods,DeletePaymentMethods,
+	GetUserPayment, GetAnyUserPayment, GetPaymentIntentClientSecret,
+	CheckoutSuccess, CheckoutCancel
 };
 use App\Controllers\Webhook\PaymentStatus;
 use App\Controllers\Pet\{
@@ -34,7 +37,8 @@ use App\Controllers\Pet\{
 	GetPetTypes,GetAnyPet,GetOverviewPet,
 	GetPetByOwner,
 	GetDocumentPet, InsertDocumentPet, DeleteDocumentPet,
-	GetVaccinePet, InsertVaccinePet, DeleteVaccinePet, GetStatusVaccinePet
+	GetVaccinePet, InsertVaccinePet, DeleteVaccinePet, GetStatusVaccinePet,
+	CreatePetScheduling, CreatePetSchedulingDashboard, GetPetScheduling
 	};
 
 return function (App $app): void {
@@ -46,6 +50,8 @@ return function (App $app): void {
 		$auth->post('/register', Register::class);
 		$auth->post('/login', Login::class);
 		$auth->post('/change-password', ChangePassword::class)->add(AuthenticationUser::class);
+		$auth->post('/new-password', NewPassword::class)->add(AuthenticationUser::class);
+		$auth->post('/forgot-password', ForgotPassword::class);
 	});
 
 	// User
@@ -63,10 +69,11 @@ return function (App $app): void {
 		$users->put('/me/emails/{id}', UpdateEmailUser::class);
 		$users->delete('/me/emails/{id}', DeleteEmailUser::class);
 		$users->post('/me/emails', InsertEmailUser::class);
-	})->add(AuthenticationUser::class);
+	})->add(new AuthenticationUserRole('USER', $logger))->add(AuthenticationUser::class);
 
 	// Veterinarian
 	$app->group('', function(Group $vet) {		
+
 		$vet->group('/veterinarians', function(Group $vet) {		
 			$vet->get('/me', GetVeterinarian::class);
 			$vet->post('/me', InsertVeterinarian::class);
@@ -90,9 +97,19 @@ return function (App $app): void {
 			$vetWork->post('/{id}/schedules', InsertVetWorkLocationSchedule::class);
 			$vetWork->put('/schedules/{id}', UpdateVetWorkLocationSchedule::class);
 			$vetWork->delete('/schedules/{id}', DeleteVetWorkLocationSchedule::class);
-
 		});
+
+		$vet->group('/vet-schedules', function(Group $scheduling) {		
+			$scheduling->get('', GetVetSchedules::class);
+		});
+
+		
 	})->add(new AuthenticationUserRole('VETERINARIAN', $logger))->add(AuthenticationUser::class);
+	$app->get('/vet-work-locations/any', GetAnyVetWorkLocation::class);
+
+	$app->group('/vet-dashboard', function(Group $vetDashboard) {		
+		$vetDashboard->get('', GetVetDashboard::class);
+	});
 
 	// Location
 	$app->group('/location', function(Group $location) {		
@@ -117,27 +134,45 @@ return function (App $app): void {
 			$vaccine->get('/{id}', GetVaccinePet::class);
 			$vaccine->post('/{id}', InsertVaccinePet::class);
 			$vaccine->delete('/{id}', DeleteVaccinePet::class);
-			//$petDocument->delete('/{id}', DeleteDocumentPet::class);
 		});
 
 		$pet->group('/pets', function(Group $pets) use($logger) {		
 			$pets->post('', InsertPet::class);
 			$pets->get('', GetPet::class);
-			$pets->get('/owner/{ownerid}', GetPetByOwner::class)->add(new AuthenticationUserRole('ADMIN', $logger));
 			$pets->get('/overview/{id}', GetOverviewPet::class);
 			$pets->get('/{id}', GetAnyPet::class);
 			$pets->put('/{id}', UpdatePet::class);
 			$pets->delete('/{id}', DeletePet::class);
 		});
-	})->add(AuthenticationUser::class);
+	})->add(new AuthenticationUserRole('USER', $logger))->add(AuthenticationUser::class);;
+
+	$app->group('/pet-scheduling', function(Group $scheduling) use($logger) {
+		
+		$scheduling->group('', function(Group $scheduling) {
+			$scheduling->post('', CreatePetScheduling::class);
+			$scheduling->get('/{id}', GetPetScheduling::class);
+		})->add(new AuthenticationUserRole('USER', $logger))->add(AuthenticationUser::class);
+	});
+
+	//Dashboard
+	$app->group('/dashboard', function(Group $dashboard) {
+		$dashboard->post('/scheduling', CreatePetSchedulingDashboard::class);
+		$dashboard->get('', GetVetDashboard::class);
+		$dashboard->get('/vet-work-locations', GetAnyVetWorkLocation::class);
+	});
 
 	// Subscription
-	$app->group('', function(Group $subscription) {
+	$app->group('', function(Group $subscription) use($logger) {
 		$subscription->group('/subscriptions', function(Group $subscription) {
 			$subscription->get('/me', UserSubscription::class);
+			$subscription->delete('/me', DeleteSubscription::class);
 			$subscription->post('', CreateSubscription::class);
 		})->add(AuthenticationUser::class); 
-		$subscription->get('/subscription-plans', GetAllSubscriptions::class);
+		
+		$subscription->group('/subscription-plans', function(Group $subscription) use($logger) {
+			$subscription->get('', GetAllSubscriptions::class);
+			$subscription->post('', CreatePlan::class)->add(new AuthenticationUserRole('VETERINARIAN', $logger))->add(AuthenticationUser::class);
+		});
 
 		$subscription->group('/payment-methods', function(Group $payments) {
 			$payments->get('/user/me', GetUserPaymentMethods::class);
@@ -146,18 +181,28 @@ return function (App $app): void {
 			$payments->put('/{id}/default', UpdateDefaultPaymentMethods::class);
 			$payments->delete('/{id}', DeletePaymentMethods::class);
 
-			$payments->post('', CreatePaymentMethod::class);
+			$payments->post('', CreatePaymentMethods::class);
 		})->add(AuthenticationUser::class);
 
 		$subscription->group('/payments', function(Group $payments) {
 			$payments->get('/user/me', GetUserPayment::class);
-			//$payments->get('/user/{id}', GetAnyUserPayment::class);
-			//$payments->get('/user/me/default', GetUserDefaultPaymentMethods::class);
+			$payments->get('/user/{id}', GetAnyUserPayment::class);
+			$payments->get('/user/me/default', GetUserDefaultPaymentMethods::class);
+			$payments->get('/user/me/client-secret', GetPaymentIntentClientSecret::class);
 		})->add(AuthenticationUser::class);
 	});
 
+	$app->group('/admin', function(Group $admin) {
+		$admin->group('/pet', function(Group $pet) {
+			$pet->get('/owner/{ownerid}', GetPetByOwner::class);
+		});
+	})->add(new AuthenticationUserRole('ADMIN', $logger));
+
 	// Subscription
-	$app->group('/webhook', function(Group $webhook) {
-		$webhook->post('/payment-status', PaymentStatus::class);
+	$app->group('/webhooks', function(Group $webhook) {
+		$webhook->post('/stripe', PaymentStatus::class);
 	});
+
+	$app->get("/confirm-payment", CheckoutSuccess::class);
+	$app->get("/cancel-payment", CheckoutCancel::class);
 };

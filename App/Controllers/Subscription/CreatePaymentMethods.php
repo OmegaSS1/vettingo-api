@@ -7,7 +7,7 @@ use App\Traits\MessageException;
 use Exception;
 use Psr\Http\Message\ResponseInterface as Response;
 
-class CreatePaymentMethod extends SubscriptionAction {
+class CreatePaymentMethods extends SubscriptionAction {
 
     protected function action(): Response {
         $form = $this->post();
@@ -15,11 +15,12 @@ class CreatePaymentMethod extends SubscriptionAction {
         
         try {
             $setupIntent = $this->stripe->createSetupIntent($form);
+            $this->stripe->setPaymentMethodToCustomer($setupIntent->metadata->stripePaymentMethodId, $user->getStripeCustomerId());
         } catch (Exception $e) {
             throw new Exception("Erro ao criar SetupIntent", 500);
         }
 
-        $this->iPaymentMethodRepository->insert([
+        $method = $this->iPaymentMethodRepository->insert([
             "user_id" => $user->getId(),
             "stripe_payment_method_id" => $form["stripePaymentMethodId"],
             "type" => $form["type"],
@@ -30,7 +31,9 @@ class CreatePaymentMethod extends SubscriptionAction {
             "is_default" => $form["isDefault"],
         ]);
 
-        return $this->respondWithData(["success" => true, "clientSecret" => $setupIntent->client_secret, "setupIntentId" => $setupIntent->id]);
+        $this->toArray($method);
+        return $this->respondWithData($method);
+        //return $this->respondWithData(["success" => true, "clientSecret" => $setupIntent->client_secret, "setupIntentId" => $setupIntent->id]);
     }
 
     private function validate(array &$form){

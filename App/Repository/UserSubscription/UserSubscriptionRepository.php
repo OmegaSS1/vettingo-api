@@ -41,7 +41,7 @@ class UserSubscriptionRepository implements IUserSubscriptionRepository {
     }
 
 	public function findByUserId(int $id) {
-		if(!$registers = $this->database->select("*", $this->table, "user_id = $id", "deleted_at IS NULL")) return $registers;
+		if(!$registers = $this->database->select("*", $this->table, "user_id = $id", "deleted_at IS NULL", "", 1)) return $registers;
 
 		return $this->getObject($registers);
 	}
@@ -52,13 +52,13 @@ class UserSubscriptionRepository implements IUserSubscriptionRepository {
 		return $this->getObject($registers);
 	}
 
-	public function findByStripeSubscriptionId(int $id) {
-		if(!$registers = $this->database->select("*", $this->table, "stripe_subscription_id = $id", "deleted_at IS NULL", "", 1)) return $registers;
+	public function findByStripeSubscriptionId(string $id) {
+		if(!$registers = $this->database->select("*", $this->table, "stripe_subscription_id = '$id'", "deleted_at IS NULL", "", 1)) return $registers;
 
 		return $this->getObject($registers);
 	}
 
-	public function insert(array $data){
+	public function insert(array $data): array|UserSubscription{
 		$data = $this->database->insert($this->table, $data);
 		return $this->getObject($data);
 	}
@@ -120,10 +120,10 @@ interface IUserSubscriptionRepository {
 
 	/**
 	 * Summary of findByStripeSubscriptionId
-	 * @param int $plan_id
+	 * @param string $plan_id
 	 * @return array|UserSubscription
 	 */
-	public function findByStripeSubscriptionId(int $id);
+	public function findByStripeSubscriptionId(string $id);
 
 	/**
 	 * Summary of insert

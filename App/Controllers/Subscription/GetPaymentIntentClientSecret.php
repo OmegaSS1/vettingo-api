@@ -7,20 +7,30 @@ use App\Traits\MessageException;
 use Exception;
 use Psr\Http\Message\ResponseInterface as Response;
 
-class CreateSetupIntent extends SubscriptionAction {
+class GetPaymentIntentClientSecret extends SubscriptionAction {
 
     protected function action(): Response {
-        $form = $this->post();
-        $user = $this->validate($form);
+        //$form = $this->post();
+        //$user = $this->validate($form);
         
         try {
-            $setupIntent = $this->stripe->createSetupIntent($form["metadata"]);
-            $this->stripe->setPaymentMethodToCustomer($setupIntent->metadata->stripePaymentMethodId, $user->getStripeCustomerId());
+
+
+            $checkout = $this->stripe->createCheckout("price_1S86OI6aUFqQ4eZQEgDMUif5");
+            
+
+            //$userSubscription = $this->iUserSubscriptionRepository->findByUserId($this->USER->sub);
+            //$subscription = $this->stripe->retrieveSubscription($userSubscription->getStripeSubscriptionId());
+
+            
+            //$setupIntent = $this->stripe->createSetupIntent($form["metadata"]);
+            //$this->stripe->setPaymentMethodToCustomer($setupIntent->metadata->stripePaymentMethodId, $user->getStripeCustomerId());
         } catch (Exception $e) {
             throw new Exception("Erro ao criar SetupIntent", 500);
         }
 
-        return $this->respondWithData(["success" => true, "clientSecret" => $setupIntent->client_secret, "setupIntentId" => $setupIntent->id]);
+        return $this->respondWithData(["id" => $checkout->id, "url" => $checkout->url]);
+        // return $this->respondWithData(["success" => true, "clientSecret" => $setupIntent->client_secret, "setupIntentId" => $setupIntent->id]);
     }
 
     private function validate(array $form){

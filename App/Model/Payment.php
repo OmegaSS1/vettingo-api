@@ -24,8 +24,9 @@ class Payment implements JsonSerializable
 	private ?int $refund_amount;
 	private string $created_at;
 	private string $updated_at;
+	private ?string $stripe_checkout_id;
 
-	public function __construct(int $id, int $user_id, ?int $subscription_id, ?string $stripe_payment_intent_id, ?string $stripe_invoice_id, int $amount, string $currency, string $status, ?string $description, ?string $metadata, ?string $paid_at, ?string $failed_at, ?string $refunded_at, ?int $refund_amount, string $created_at, string $updated_at){$this->id = $id;$this->user_id = $user_id;$this->subscription_id = $subscription_id;$this->stripe_payment_intent_id = $stripe_payment_intent_id;$this->stripe_invoice_id = $stripe_invoice_id;$this->amount = $amount;$this->currency = $currency;$this->status = $status;$this->description = $description;$this->metadata = $metadata;$this->paid_at = $paid_at;$this->failed_at = $failed_at;$this->refunded_at = $refunded_at;$this->refund_amount = $refund_amount;$this->created_at = $created_at;$this->updated_at = $updated_at;}
+	public function __construct(int $id, int $user_id, ?int $subscription_id, ?string $stripe_payment_intent_id, ?string $stripe_invoice_id, int $amount, string $currency, string $status, ?string $description, ?string $metadata, ?string $paid_at, ?string $failed_at, ?string $refunded_at, ?int $refund_amount, string $created_at, string $updated_at, ?string $stripe_checkout_id){$this->id = $id;$this->user_id = $user_id;$this->subscription_id = $subscription_id;$this->stripe_payment_intent_id = $stripe_payment_intent_id;$this->stripe_invoice_id = $stripe_invoice_id;$this->amount = $amount;$this->currency = $currency;$this->status = $status;$this->description = $description;$this->metadata = $metadata;$this->paid_at = $paid_at;$this->failed_at = $failed_at;$this->refunded_at = $refunded_at;$this->refund_amount = $refund_amount;$this->created_at = $created_at;$this->updated_at = $updated_at;$this->stripe_checkout_id = $stripe_checkout_id;}
 	
 	public function getId(): int {return $this->id;}
 
@@ -58,26 +59,28 @@ class Payment implements JsonSerializable
 	public function getCreatedAt(): string {return $this->created_at;}
 
 	public function getUpdatedAt(): string {return $this->updated_at;}
+	public function getStripeCheckoutId(): ?string {return $this->stripe_checkout_id;}
 
     public function jsonSerialize(): array
     {
         return [
 			"id" => $this->id,
-			"user_id" => $this->user_id,
-			"subscription_id" => $this->subscription_id,
-			"stripe_payment_intent_id" => $this->stripe_payment_intent_id,
-			"stripe_invoice_id" => $this->stripe_invoice_id,
+			"userId" => $this->user_id,
+			"subscriptionId" => $this->subscription_id,
+			"stripePaymentIntentId" => $this->stripe_payment_intent_id,
+			"stripeInvoiceId" => $this->stripe_invoice_id,
 			"amount" => $this->amount,
 			"currency" => $this->currency,
 			"status" => $this->status,
 			"description" => $this->description,
 			"metadata" => $this->metadata,
-			"paid_at" => $this->paid_at,
-			"failed_at" => $this->failed_at,
-			"refunded_at" => $this->refunded_at,
-			"refund_amount" => $this->refund_amount,
-			"created_at" => $this->created_at,
-			"updated_at" => $this->updated_at
+			"paidAt" => $this->paid_at,
+			"failedAt" => $this->failed_at,
+			"refundedAt" => $this->refunded_at,
+			"refundAmount" => $this->refund_amount,
+			"createdAt" => $this->created_at,
+			"updatedAt" => $this->updated_at,
+			"stripeCheckoutId" => $this->stripe_checkout_id
         ];
     }
 }

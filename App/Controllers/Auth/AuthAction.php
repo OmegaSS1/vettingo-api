@@ -9,6 +9,7 @@ use App\Repository\User\IUserRepository;
 use App\Repository\UserEmail\IUserEmailRepository;
 use App\Repository\UserPhone\IUserPhoneRepository;
 use App\Repository\UserSecurityProfile\IUserSecurityProfileRepository;
+use App\Services\Email;
 use App\Services\Stripe;
 use App\Services\TokenJWT;
 use Psr\Log\LoggerInterface;
@@ -23,6 +24,7 @@ abstract class AuthAction extends Action
     protected IUserSecurityProfileRepository $iUserSecurityProfileRepository;
 	protected TokenJWT $tokenJWT;
     protected Stripe $stripe;
+    protected Email $email;
     
     public function __construct (
         LoggerInterface $logger,
@@ -32,7 +34,8 @@ abstract class AuthAction extends Action
         IUserPhoneRepository $iUserPhoneRepository,
         IUserSecurityProfileRepository $iUserSecurityProfileRepository,
 		TokenJWT $tokenJWT,
-        Stripe $stripe
+        Stripe $stripe,
+        Email $email
     )
     {
         parent::__construct($logger, $iDatabaseRepository);
@@ -42,5 +45,6 @@ abstract class AuthAction extends Action
         $this->iUserSecurityProfileRepository = $iUserSecurityProfileRepository;
 		$this->tokenJWT = $tokenJWT;
         $this->stripe = $stripe;
+        $this->email = $email;
     }
 }

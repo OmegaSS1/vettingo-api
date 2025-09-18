@@ -22,6 +22,9 @@ class UpdateDefaultPaymentMethods extends SubscriptionAction {
 
         $payment = $this->iPaymentMethodRepository->update(["is_default" => "TRUE"], "id = {$paymentMethod->getId()}");
         
+        $user = $this->iUserRepository->findById($this->USER->sub);
+        $this->stripe->setPaymentMethodToCustomer($paymentMethod->getStripePaymentMethodId(), $user->getStripeCustomerId());
+
         $this->iDatabaseRepository->commit();
 
         $this->toArray($payment);

@@ -13,15 +13,15 @@ class Email {
 		$this->mail              = new PHPMailer(true);
 		$this->mail->isSMTP();
 		$this->mail->CharSet     = "utf-8";
-		$this->mail->Host        = 'smtp.email.sa-saopaulo-1.oci.oraclecloud.com';
+		$this->mail->Host        = 'smtp.gmail.com';
 		$this->mail->SMTPAuth    = true;
-		$this->mail->Username    = 'ocid1.user.oc1..aaaaaaaamgxkl4xjqwnxmjsntrujbwxae7xo7zor4hnxqp2ssi6yzfvlfzbq@ocid1.tenancy.oc1..aaaaaaaai7a72s5jgxce6rik7qna2nx2j3flclxvvrkg3mojvxmrjz3hmf6q.pw.com';
-		$this->mail->Password    = '[;j9DIBcoC]6r0T:P1kE';
+		$this->mail->Username    = 'vitaum.alves@gmail.com';
+		$this->mail->Password    = 'gdie izes zbwf epiq';
 		$this->mail->SMTPSecure  = 'ssl';
 		$this->mail->SMTPAutoTLS = true;
 		$this->mail->SMTPSecure  = PHPMailer::ENCRYPTION_STARTTLS;
 		$this->mail->Port        = 587;
-		$this->mail->setFrom('oci@smsprefeiturasp.com.br', 'SISAD - SISTEMA DE ATENÇÃO DOMICILIAR');
+		$this->mail->setFrom('vitaum.alves@gmail.com', 'Vettingo');
     }
 
     public function send(string $title, string $message, $recipient, $cc = [], $cco = [], bool $image = false, array $imagePath = []) {
@@ -65,7 +65,7 @@ class Email {
 			$this->mail->send();
 			return true;
 		} catch (Exception $e) {
-			throw new Exception('Erro ao tentar enviar o email! Tente novamente mais tarde.', 400);
+			throw new Exception($e->getMessage(), 400);
 		}
     }
 }

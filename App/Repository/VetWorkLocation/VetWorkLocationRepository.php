@@ -43,7 +43,58 @@ class VetWorkLocationRepository implements IVetWorkLocationRepository {
         $this->database = $database;
     }
 
-	public function findByVeterinarianId(int $id, array $options = []) {
+	public function findAnyVeterinarian(array $options) {
+		[$and, $orderParams, $limit, $offset] = $this->database->mountOption($options);
+		$and = !empty($orderParams) ? "AND $and" : "";
+		$order = !empty($orderParams) ? "ORDER BY $orderParams" : "";
+		$limit = $limit > 0 ? "LIMIT $limit" : "";
+		$offset = "OFFSET $offset";
+
+		$query = "with work as (
+					select 
+						vwl.veterinarian_id,
+						concat(vwl.address, ', ', vwl.number, ', ', vwl.neighborhood, ' - ', vwl.zip_code) address,
+						jsonb_agg(
+							json_build_object(
+								case
+									when day_of_week = 1 then 'Segunda-Feira'
+									when day_of_week = 2 then 'Terça-Feira'
+									when day_of_week = 3 then 'Quarta-Feira'
+									when day_of_week = 4 then 'Quinta-Feira'
+									when day_of_week = 5 then 'Sexta-Feira'
+									when day_of_week = 6 then 'Sabado-Feira'
+									when day_of_week = 0 then 'Domingo-Feira'
+								end,
+								concat(start_time, ' - ', end_time)
+							)
+						) schedule
+					from vet_work_location vwl 
+					join vet_work_location_schedule schedule on schedule.vet_work_location_id = vwl.id
+					where vwl.\"isActive\" = true	
+					$and
+					group by vwl.id, vwl.address
+					$order
+					$limit
+					$offset
+				) select 
+					v.user_id id,
+					CONCAT(u.first_name,' ', u.last_name) name,
+					CONCAT(s.uf,'-',v.crmv) crmv,
+					v.bio,
+					v.website,
+					v.avatar,
+					v.emergencial_attendance emergencial,
+					v.domiciliary_attendance domiciliary,
+					count(work.veterinarian_id) totalWorkLocation
+				from veterinarian v
+				join public.user u on u.id = v.user_id 
+				join state s on s.id = v.crmv_state_id 
+				join work on work.veterinarian_id = v.id
+				group by v.id, u.first_name, u.last_name, s.uf, v.bio, v.crmv,v.website, v.avatar, emergencial, domiciliary";
+		return $this->database->runSelect($query);
+	}
+
+	public function findByVeterinarianId(int $id, array $options = []): array|VetWorkLocation {
 		[$and, $orderParams] = $this->database->mountOption($options);
 		if(!$registers = $this->database->select("*", $this->table, "veterinarian_id = $id", $and, $orderParams)) return $registers;
 
@@ -104,6 +155,13 @@ class VetWorkLocationRepository implements IVetWorkLocationRepository {
 };
 
 interface IVetWorkLocationRepository {
+	/**
+	 * Summary of findAnyVeterinarian
+	 * @param array $options
+	 * @return array|VetWorkLocation
+	 */
+	public function findAnyVeterinarian(array $options);
+
 	/**
 	 * Summary of findByVeterinarianId
 	 * @param int $id

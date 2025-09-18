@@ -6,7 +6,9 @@ namespace App\Controllers\Veterinarian;
 use App\Controllers\Action;
 use App\Repository\City\ICityRepository;
 use App\Repository\Database\IDatabaseRepository;
+use App\Repository\PetConsult\IPetConsultRepository;
 use App\Repository\State\IStateRepository;
+use App\Repository\User\IUserRepository;
 use App\Repository\UserEmail\IUserEmailRepository;
 use App\Repository\UserPhone\IUserPhoneRepository;
 use App\Repository\Veterinarian\IVeterinarianRepository;
@@ -30,6 +32,8 @@ abstract class VeterinarianAction extends Action
     protected IStateRepository $iStateRepository;
     protected ICityRepository $iCityRepository;
     protected VettingoBucket $vettingoBucket; 
+    protected IUserRepository $iUserRepository;
+    protected IPetConsultRepository $iPetConsultRepository;
 
     public function __construct (
         LoggerInterface $logger,
@@ -43,7 +47,9 @@ abstract class VeterinarianAction extends Action
         IUserEmailRepository $iUserEmailRepository,
         IStateRepository $iStateRepository,
         ICityRepository $iCityRepository,
-        VettingoBucket $vettingoBucket
+        VettingoBucket $vettingoBucket,
+        IUserRepository $iUserRepository,
+        IPetConsultRepository $iPetConsultRepository
     )
     {
         parent::__construct($logger, $iDatabaseRepository);
@@ -57,5 +63,7 @@ abstract class VeterinarianAction extends Action
         $this->iStateRepository = $iStateRepository;
         $this->iCityRepository = $iCityRepository;
         $this->vettingoBucket = $vettingoBucket;
+        $this->iUserRepository = $iUserRepository;
+        $this->iPetConsultRepository = $iPetConsultRepository;
     }
 }

@@ -32,7 +32,8 @@ class PaymentRepository implements IPaymentRepository {
 		"refunded_at",
 		"refund_amount",
 		"created_at",
-		"updated_at"
+		"updated_at",
+		"stripe_checkout_id"
 	];
 
     /**
@@ -41,6 +42,12 @@ class PaymentRepository implements IPaymentRepository {
     public function __construct(Database $database){
         $this->database = $database;
     }
+
+	public function findByStripeCheckoutId(string $id) {
+		if(!$registers = $this->database->select("*", $this->table, "stripe_checkout_id = '$id'")) return $registers;
+		
+		return $this->getObject($registers);
+	}
 
 	public function findByUserId(int $id) {
 		if(!$registers = $this->database->select("*", $this->table, "user_id = $id")) return $registers;
@@ -54,14 +61,14 @@ class PaymentRepository implements IPaymentRepository {
 		return $this->getObject($registers);
 	}
 
-	public function findByStripeInvoiceId(int $id) {
-		if(!$registers = $this->database->select("*", $this->table, "stripe_invoice_id = $id", "", "", 1)) return $registers;
+	public function findByStripeInvoiceId(string $id) {
+		if(!$registers = $this->database->select("*", $this->table, "stripe_invoice_id = '$id'", "", "", 1)) return $registers;
 
 		return $this->getObject($registers);
 	}
 
-	public function findByStripePaymentIntentId(int $id) {
-		if(!$registers = $this->database->select("*", $this->table, "stripe_payment_intent_id = $id", "", "", 1)) return $registers;
+	public function findByStripePaymentIntentId(string $id) {
+		if(!$registers = $this->database->select("*", $this->table, "stripe_payment_intent_id = '$id'", "", "", 1)) return $registers;
 
 		return $this->getObject($registers);
 	}
@@ -103,6 +110,7 @@ class PaymentRepository implements IPaymentRepository {
 				(int) $v[$this->columns[13]],
 				(string) $v[$this->columns[14]],
 				(string) $v[$this->columns[15]],
+				(string) $v[$this->columns[16]],
 			);
 		}
 
@@ -114,13 +122,19 @@ class PaymentRepository implements IPaymentRepository {
 };
 
 interface IPaymentRepository {
-
 	/**
 	 * Summary of findByUserId
 	 * @param int $id
 	 * @return array|Payment
 	 */
 	public function findByUserId(int $id);
+
+	/**
+	 * Summary of findByStripeCheckoutId
+	 * @param string $id
+	 * @return array|Payment
+	 */
+	public function findByStripeCheckoutId(string $id);
 
 	/**
 	 * Summary of findBySubscriptionId
@@ -131,17 +145,17 @@ interface IPaymentRepository {
 
 	/**
 	 * Summary of findByStripeInvoiceId
-	 * @param int $id
+	 * @param string $id
 	 * @return array|Payment
 	 */
-	public function findByStripeInvoiceId(int $id);
+	public function findByStripeInvoiceId(string $id);
 
 	/**
 	 * Summary of findByStripePaymentIntentId
-	 * @param int $id
+	 * @param string $id
 	 * @return array|Payment
 	 */
-	public function findByStripePaymentIntentId(int $id);
+	public function findByStripePaymentIntentId(string $id);
 
 	/**
 	 * Summary of insert

@@ -57,19 +57,19 @@ class UserSubscription implements JsonSerializable
     {
         return [
 			"id" => $this->id,
-			"user_id" => $this->user_id,
-			"plan_id" => $this->plan_id,
+			"userId" => $this->user_id,
+			"planId" => $this->plan_id,
 			"status" => $this->status,
-			"stripe_subscription_id" => $this->stripe_subscription_id,
-			"current_period_start" => $this->current_period_start,
-			"current_period_end" => $this->current_period_end,
-			"cancel_at_period_end" => $this->cancel_at_period_end,
-			"canceled_at" => $this->canceled_at,
-			"trial_start" => $this->trial_start,
-			"trial_end" => $this->trial_end,
-			"created_at" => $this->created_at,
-			"updated_at" => $this->updated_at,
-			"deleted_at" => $this->deleted_at
+			"stripeSubscriptionId" => $this->stripe_subscription_id,
+			"currentPeriodStart" => $this->current_period_start,
+			"currentPeriodEnd" => $this->current_period_end,
+			"cancelAtPeriodEnd" => $this->cancel_at_period_end,
+			"canceledAt" => $this->canceled_at,
+			"trialStart" => $this->trial_start,
+			"trialEnd" => $this->trial_end,
+			"createdAt" => $this->created_at,
+			"updatedAt" => $this->updated_at,
+			"deletedAt" => $this->deleted_at,
         ];
     }
 }

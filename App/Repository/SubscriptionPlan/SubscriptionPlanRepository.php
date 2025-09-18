@@ -56,18 +56,18 @@ class SubscriptionPlanRepository implements ISubscriptionPlanRepository {
 		return $this->getObject($registers);
 	}
 
-	public function findByStripePriceId(int $id) {
+	public function findByStripePriceId(string $id) {
 		$sql = "SELECT * 
 				FROM $this->table 
-				WHERE stripe_price_id_monthly = $id 
-					OR stripe_price_id_yearly = $id";
+				WHERE stripe_price_id_monthly = '$id' 
+					OR stripe_price_id_yearly = '$id'";
 		if(!$registers = $this->database->runSelect($sql)) return $registers;
 
 		return $this->getObject($registers);
 	}
 
 	public function findBySlug(string $slug) {
-		if(!$registers = $this->database->select("*", $this->table, "slug = $slug", "deleted_at IS NULL")) return $registers;
+		if(!$registers = $this->database->select("*", $this->table, "slug = '$slug'", "deleted_at IS NULL")) return $registers;
 
 		return $this->getObject($registers);
 	}
@@ -138,10 +138,10 @@ interface ISubscriptionPlanRepository {
 
 	/**
 	 * Summary of findByStripePriceId
-	 * @param int $id
+	 * @param string $id
 	 * @return array|SubscriptionPlan
 	 */
-	public function findByStripePriceId(int $id);
+	public function findByStripePriceId(string $id);
 
 	/**
 	 * Summary of findBySlug
